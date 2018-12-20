@@ -224,6 +224,17 @@ func (s *TemplateBuilder) SetOSDiskSizeGB(diskSizeGB int32) error {
 	return nil
 }
 
+func (s *TemplateBuilder) SetIdentity(identityIDs []string, isManaged bool) error {
+	resource, err := s.getResourceByType(resourceVirtualMachine)
+	if err != nil {
+		return err
+	}
+
+	profile := resource.Identity
+	profile.Type = to.StringPtr("systemAssigned")
+	return nil
+}
+
 func (s *TemplateBuilder) SetAdditionalDisks(diskSizeGB []int32, isManaged bool) error {
 	resource, err := s.getResourceByType(resourceVirtualMachine)
 	if err != nil {
@@ -616,7 +627,8 @@ const BasicTemplate = `{
              "enabled": false
           }
         }
-      }
+			},
+			"identity": null
     }
   ]
 }`

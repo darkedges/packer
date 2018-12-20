@@ -7,7 +7,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 
 	"fmt"
-
+	
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/template"
 )
@@ -114,6 +114,10 @@ func GetVirtualMachineDeployment(config *Config) (*resources.Deployment, error) 
 			config.VirtualNetworkResourceGroupName,
 			config.VirtualNetworkName,
 			config.VirtualNetworkSubnetName)
+	}
+
+	if config.IdentityType != "" {
+		builder.SetIdentity(config.IdentityIDs, len(config.IdentityIDs) > 0)
 	}
 
 	builder.SetTags(&config.AzureTags)

@@ -164,6 +164,10 @@ type Config struct {
 
 	//Cleanup
 	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
+
+	// Identity
+	IdentityType	string `mapstructure:"identity_type"`
+	IdentityIDs     []string `mapstructure:"identity_ids"`
 }
 
 type keyVaultCertificate struct {
@@ -311,11 +315,18 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 	var errs *packer.MultiError
 	errs = packer.MultiErrorAppend(errs, c.Comm.Prepare(&c.ctx)...)
 
+	err = setIdentity(&c)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	assertRequiredParametersSet(&c, errs)
 	assertTagProperties(&c, errs)
 	if errs != nil && len(errs.Errors) > 0 {
 		return nil, nil, errs
 	}
+
+
 
 	return &c, nil, nil
 }
@@ -408,6 +419,30 @@ func setUserNamePassword(c *Config) {
 	} else {
 		c.Password = c.tmpAdminPassword
 	}
+}
+
+func setIdentity(c *Config) error {
+
+	if c.IdentityType == "" {
+		return nil
+	}
+
+
+	lookup := map[string]bool {
+		"SYSTEMASSIGNED": true,
+		"USERASSIGNED": true,
+	}
+	name := strings.ToUpper(c.IdentityType)
+	ok := lookup[name]
+	if !ok {
+		return fmt.Errorf("There is no Identity Type matching the name '%s'!", c.IdentityType)
+	}
+	if (strings.EqualFold(c.IdentityType, "userassigned")) {
+		if c.IdentityIDs == nil {
+			return fmt.Errorf("Need to provide Identity IDs for IdentityType: UserAssigned")
+		}
+	}
+	return nil
 }
 
 func setCloudEnvironment(c *Config) error {
