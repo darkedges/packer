@@ -628,7 +628,9 @@ const BasicTemplate = `{
           }
         }
 			},
-			"identity": null
+			"identity": {
+				"type": "systemAssigned"
+			}
     }
   ]
 }`

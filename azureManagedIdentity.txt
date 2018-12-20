@@ -1,0 +1,29 @@
+{
+    "_comment": "This Packer File generated a Red Hat Enterprise Linux 7.3 image with NGNIX on Azure",
+    "builders": [
+        {
+            "type": "azure-arm",
+            "client_id": "d3f50e77-ed47-493c-8982-399bacff5521",
+            "client_secret": "562daeb3-5309-41ed-81ad-0c1f07f9de40",
+            "subscription_id": "4f68cc9a-9cbb-4466-a564-6738aae15977",
+            "tenant_id": "4161be3f-bf2b-41d4-a02b-e6f82b529d53",
+            "managed_image_name": "rhel73-jboss",
+            "managed_image_resource_group_name": "packerresourcegroup",
+            "os_type": "Linux",
+            "image_publisher": "RedHat",
+            "image_offer": "RHEL",
+            "image_sku": "7.3",
+            "azure_tags": {
+                "madewith": "HashiCorp Packer",
+                "Creator": "Nicholas Irving"
+            },
+            "location": "Australia Southeast",
+            "vm_size": "Standard_B1s",
+            "identity_type": "UserAssigned",
+            "identity_ids": [
+                "vmmanageduser"
+            ]
+        }
+    ],
+    "provisioners": []
+}
