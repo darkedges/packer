@@ -524,6 +524,7 @@ const BasicTemplate = `{
     "variables": {
         "addressPrefix": "10.0.0.0/16",
         "apiVersion": "2017-03-30",
+        "computeApiVersion": "2018-10-01",
         "managedDiskApiVersion": "2017-03-30",
         "networkInterfacesApiVersion": "2017-04-01",
         "publicIPAddressApiVersion": "2017-04-01",
@@ -600,7 +601,7 @@ const BasicTemplate = `{
             }
         },
         {
-            "apiVersion": "[variables('apiVersion')]",
+            "apiVersion": "[variables('computeApiVersion')]",
             "type": "Microsoft.Compute/virtualMachines",
             "name": "[parameters('vmName')]",
             "location": "[variables('location')]",
