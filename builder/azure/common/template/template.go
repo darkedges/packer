@@ -32,8 +32,19 @@ type Resource struct {
 	DependsOn  *[]string           `json:"dependsOn,omitempty"`
 	Plan       *Plan               `json:"plan,omitempty"`
 	Properties *Properties         `json:"properties,omitempty"`
+	Identity   *Identity           `json:"identity,omitempty"`
 	Tags       *map[string]*string `json:"tags,omitempty"`
 	Resources  *[]Resource         `json:"resources,omitempty"`
+}
+
+type Identity struct {
+	Type       			   *string                      `json:"type"`
+	UserAssignedIdentities *map[string]*IdentityIDUnion `json:"userAssignedIdentities,omitempty"`
+}
+
+type IdentityIDUnion struct {
+	PrincipalID *string `json:"principalId,omitempty"`
+    ClientId    *string `json:"clientId,omitempty"`
 }
 
 type Plan struct {
