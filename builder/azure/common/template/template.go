@@ -38,7 +38,13 @@ type Resource struct {
 }
 
 type Identity struct {
-	Type       *string             `json:"type"`
+	Type       			   *string                      `json:"type"`
+	UserAssignedIdentities *map[string]*IdentityIDUnion `json:"userAssignedIdentities,omitempty"`
+}
+
+type IdentityIDUnion struct {
+	PrincipalID *string `json:"principalId,omitempty"`
+    ClientId    *string `json:"clientId,omitempty"`
 }
 
 type Plan struct {

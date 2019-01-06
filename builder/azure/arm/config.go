@@ -326,8 +326,6 @@ func newConfig(raws ...interface{}) (*Config, []string, error) {
 		return nil, nil, errs
 	}
 
-
-
 	return &c, nil, nil
 }
 
