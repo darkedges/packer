@@ -35,4 +35,8 @@ const (
 	ArmManagedImageLocation          string = "arm.ManagedImageLocation"
 	ArmManagedImageName              string = "arm.ManagedImageName"
 	ArmAsyncResourceGroupDelete      string = "arm.AsyncResourceGroupDelete"
+
+	ArmIsManagedUserIdentityCreated string = "arm.IsManagedUserIdentityCreated"
+	ArmManagedUserIdentity          string = "arm.ManagedUserIdentity"
+	ArmManagedUserIdentityRoles     string = "arm.ManagedUserIdentityRoles"
 )

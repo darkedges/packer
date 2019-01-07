@@ -12,6 +12,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-04-01/compute"
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2018-01-01/network"
+	armMsi "github.com/Azure/azure-sdk-for-go/services/preview/msi/mgmt/2015-08-31-preview/msi"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	armStorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 	"github.com/Azure/azure-sdk-for-go/storage"
@@ -40,6 +41,7 @@ type AzureClient struct {
 	common.VaultClient
 	armStorage.AccountsClient
 	compute.DisksClient
+	armMsi.UserAssignedIdentitiesClient
 
 	InspectorMaxLength int
 	Template           *CaptureTemplate
@@ -194,6 +196,12 @@ func NewAzureClient(subscriptionID, resourceGroupName, storageAccountName string
 	azureClient.AccountsClient.RequestInspector = withInspection(maxlen)
 	azureClient.AccountsClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.AccountsClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.AccountsClient.UserAgent)
+
+	azureClient.UserAssignedIdentitiesClient = armMsi.NewUserAssignedIdentitiesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.UserAssignedIdentitiesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.UserAssignedIdentitiesClient.RequestInspector = withInspection(maxlen)
+	azureClient.UserAssignedIdentitiesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.UserAssignedIdentitiesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(), azureClient.AccountsClient.UserAgent)
 
 	keyVaultURL, err := url.Parse(cloud.KeyVaultEndpoint)
 	if err != nil {

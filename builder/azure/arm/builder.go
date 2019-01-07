@@ -13,7 +13,7 @@ import (
 	armstorage "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2017-10-01/storage"
 	"github.com/Azure/azure-sdk-for-go/storage"
 	"github.com/Azure/go-autorest/autorest/adal"
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/dgrijalva/jwt-go"
 	packerAzureCommon "github.com/hashicorp/packer/builder/azure/common"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/builder/azure/common/lin"
@@ -168,6 +168,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	if b.config.OSType == constants.Target_Linux {
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
+			NewStepCreateUserAssignedManagedIdentity(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetVirtualMachineDeployment),
 			NewStepDeployTemplate(azureClient, ui, b.config, deploymentName, GetVirtualMachineDeployment),
 			NewStepGetIPAddress(azureClient, ui, endpointConnectType),
@@ -192,6 +193,7 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		keyVaultDeploymentName := b.stateBag.Get(constants.ArmKeyVaultDeploymentName).(string)
 		steps = []multistep.Step{
 			NewStepCreateResourceGroup(azureClient, ui),
+			NewStepCreateUserAssignedManagedIdentity(azureClient, ui),
 			NewStepValidateTemplate(azureClient, ui, b.config, GetKeyVaultDeployment),
 			NewStepDeployTemplate(azureClient, ui, b.config, keyVaultDeploymentName, GetKeyVaultDeployment),
 			NewStepGetCertificate(azureClient, ui),
@@ -362,6 +364,11 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, b.config.ManagedImageResourceGroupName)
 	stateBag.Put(constants.ArmManagedImageName, b.config.ManagedImageName)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
+
+	if b.config.ManagedUserIdentity != "" {
+		stateBag.Put(constants.ArmManagedUserIdentity, b.config.ManagedUserIdentity)
+		stateBag.Put(constants.ArmManagedUserIdentityRoles, b.config.ManagedUserIdentityRoles)
+	}
 }
 
 // Parameters that are only known at runtime after querying Azure.

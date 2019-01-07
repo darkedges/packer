@@ -166,8 +166,10 @@ type Config struct {
 	AsyncResourceGroupDelete bool `mapstructure:"async_resourcegroup_delete"`
 
 	// Identity
-	IdentityType	string `mapstructure:"identity_type"`
-	IdentityIDs     []string `mapstructure:"identity_ids"`
+	ManagedUserIdentity      string   `mapstructure:"managed_user_identity"`
+	ManagedUserIdentityRoles []string `mapstructure:"managed_user_identity_roles"`
+	IdentityType             string   `mapstructure:"identity_type"`
+	IdentityIDs              []string `mapstructure:"identity_ids"`
 }
 
 type keyVaultCertificate struct {
@@ -425,20 +427,14 @@ func setIdentity(c *Config) error {
 		return nil
 	}
 
-
-	lookup := map[string]bool {
+	lookup := map[string]bool{
 		"SYSTEMASSIGNED": true,
-		"USERASSIGNED": true,
+		"USERASSIGNED":   true,
 	}
 	name := strings.ToUpper(c.IdentityType)
 	ok := lookup[name]
 	if !ok {
-		return fmt.Errorf("There is no Identity Type matching the name '%s'!", c.IdentityType)
-	}
-	if (strings.EqualFold(c.IdentityType, "userassigned")) {
-		if c.IdentityIDs == nil {
-			return fmt.Errorf("Need to provide Identity IDs for IdentityType: UserAssigned")
-		}
+		return fmt.Errorf("There is no identity_type matching the name '%s'!", c.IdentityType)
 	}
 	return nil
 }
@@ -764,6 +760,39 @@ func assertRequiredParametersSet(c *Config, errs *packer.MultiError) {
 		c.managedImageStorageAccountType = compute.StorageAccountTypesPremiumLRS
 	default:
 		errs = packer.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
+	}
+
+	/////////////////////////////////////////////
+	// Identity
+	if c.ManagedUserIdentity != "" {
+		if c.ManagedUserIdentityRoles == nil {
+			errs = packer.MultiErrorAppend(errs, fmt.Errorf("managed_user_identity_roles must be specified"))
+		} else {
+			if len(c.ManagedUserIdentityRoles) == 0 {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("managed_user_identity_roles must not be empty"))
+			}
+		}
+
+	}
+	if c.IdentityType != "" {
+		if strings.EqualFold(c.IdentityType, "userassigned") {
+			if c.IdentityIDs == nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("Need to provide identity_ids for identity_type: UserAssigned"))
+			} else {
+				if len(c.IdentityIDs) == 0 {
+					errs = packer.MultiErrorAppend(errs, fmt.Errorf("identity_ids must not be empty"))
+				}
+			}
+		} else {
+			if c.IdentityIDs != nil {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("identity_ids have been supplied for IdentityType: SystemAssigned"))
+			}
+		}
+		if c.ManagedUserIdentity != "" {
+			if strings.EqualFold(c.IdentityType, "SystemAssigned") {
+				errs = packer.MultiErrorAppend(errs, fmt.Errorf("If identity_type is SystemAssigned then managed_user_identity or managed_user_identity_roles must not be specified"))
+			}
+		}
 	}
 }
 
