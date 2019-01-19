@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2018-02-01/resources"
 	armMsi "github.com/Azure/azure-sdk-for-go/services/preview/msi/mgmt/2015-08-31-preview/msi"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 	"github.com/hashicorp/packer/helper/multistep"
@@ -14,7 +13,7 @@ import (
 
 type StepCreateUserAssignedManagedIdentity struct {
 	client *AzureClient
-	create func(ctx context.Context, resourceGroupName string, location string, tags map[string]*string) error
+	create func(ctx context.Context, resourceGroupName string, location string, resourceName string, resourceRoles []string, tags map[string]*string) error
 	say    func(message string)
 	error  func(e error)
 	exists func(ctx context.Context, resourceGroupName string) (bool, error)
@@ -31,8 +30,8 @@ func NewStepCreateUserAssignedManagedIdentity(client *AzureClient, ui packer.Ui)
 	return step
 }
 
-func (s *StepCreateUserAssignedManagedIdentity) createUserAssignedManagedIdentity(ctx context.Context, resourceGroupName string, location string, resourceName string, resourceRoles []string, map[string]*string) error {
-	_, err := s.client.UserAssignedIdentitiesClient.CreateOrUpdate(ctx, resourceGroupName, armMsi.Identity{
+func (s *StepCreateUserAssignedManagedIdentity) createUserAssignedManagedIdentity(ctx context.Context, resourceGroupName string, location string, resourceName string, resourceRoles []string, tags map[string]*string) error {
+	_, err := s.client.UserAssignedIdentitiesClient.CreateOrUpdate(ctx, resourceGroupName, resourceName, armMsi.Identity{
 		Location: &location,
 		Tags:     tags,
 	})
@@ -74,7 +73,7 @@ func (s *StepCreateUserAssignedManagedIdentity) Run(ctx context.Context, state m
 		managedUserIdentityRole := fmt.Sprintf("%s", id)
 		s.say(fmt.Sprintf("   -> '%s'", managedUserIdentityRole))
 	}
-	err := s.create(ctx, resourceGroupName, managedUserIdentity, managedUserIdentityRoles, location, tags)
+	err := s.create(ctx, resourceGroupName, location, managedUserIdentity, managedUserIdentityRoles, tags)
 	if err == nil {
 		state.Put(constants.ArmIsManagedUserIdentityCreated, true)
 	}
