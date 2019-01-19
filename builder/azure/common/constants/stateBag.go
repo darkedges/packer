@@ -37,6 +37,7 @@ const (
 	ArmAsyncResourceGroupDelete      string = "arm.AsyncResourceGroupDelete"
 
 	ArmIsManagedUserIdentityCreated string = "arm.IsManagedUserIdentityCreated"
+	ArmCreateManagedUserIdentity    string = "arm.CreateManagedUserIdentity"
 	ArmManagedUserIdentity          string = "arm.ManagedUserIdentity"
 	ArmManagedUserIdentityRoles     string = "arm.ManagedUserIdentityRoles"
 )

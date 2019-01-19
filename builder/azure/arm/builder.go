@@ -368,6 +368,9 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	if b.config.ManagedUserIdentity != "" {
 		stateBag.Put(constants.ArmManagedUserIdentity, b.config.ManagedUserIdentity)
 		stateBag.Put(constants.ArmManagedUserIdentityRoles, b.config.ManagedUserIdentityRoles)
+		stateBag.Put(constants.ArmCreateManagedUserIdentity, true)
+	} else {
+		stateBag.Put(constants.ArmCreateManagedUserIdentity, false)
 	}
 }
 

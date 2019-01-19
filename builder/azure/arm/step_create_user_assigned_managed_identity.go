@@ -43,22 +43,26 @@ func (s *StepCreateUserAssignedManagedIdentity) createUserAssignedManagedIdentit
 }
 
 func (s *StepCreateUserAssignedManagedIdentity) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
-	s.say("Creating user assigned managed identity ...")
 	var resourceGroupName = state.Get(constants.ArmResourceGroupName).(string)
 	var existingResourceGroup = state.Get(constants.ArmIsExistingResourceGroup).(bool)
 	var resourceGroupCreated = state.Get(constants.ArmIsResourceGroupCreated).(bool)
-	var managedUserIdentity = state.Get(constants.ArmManagedUserIdentity).(string)
-	var managedUserIdentityRoles = state.Get(constants.ArmManagedUserIdentityRoles).([]string)
+	var createManagedUserIdentity = state.Get(constants.ArmCreateManagedUserIdentity).(bool)
 	var location = state.Get(constants.ArmLocation).(string)
 	var tags = state.Get(constants.ArmTags).(map[string]*string)
 
 	state.Put(constants.ArmIsManagedUserIdentityCreated, false)
 	// If an existing resource group then just need to complete straight away
-	if existingResourceGroup {
-		state.Put(constants.ArmIsManagedUserIdentityCreated, true)
+	if existingResourceGroup || !createManagedUserIdentity {
+		s.say("Skipping creating user assigned managed identity ...")
 		return multistep.ActionContinue
 	}
 
+	var managedUserIdentity = state.Get(constants.ArmManagedUserIdentity).(string)
+	s.say(fmt.Sprintf("managedUserIdentity:       '%s'", managedUserIdentity))
+	var managedUserIdentityRoles = state.Get(constants.ArmManagedUserIdentityRoles).([]string)
+	s.say(fmt.Sprintf("managedUserIdentityRoles:  '%v'", existingResourceGroup))
+
+	s.say("Creating user assigned managed identity ...")
 	// If the Resource Group has not been created need to let people know
 	if !resourceGroupCreated {
 		err := errors.New(fmt.Sprintf(" -> Resource Group '%s' not created", resourceGroupName))
@@ -81,5 +85,4 @@ func (s *StepCreateUserAssignedManagedIdentity) Run(ctx context.Context, state m
 }
 
 func (s *StepCreateUserAssignedManagedIdentity) Cleanup(state multistep.StateBag) {
-	return
 }
